@@ -1,0 +1,66 @@
+from openai import OpenAI
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+# ✅ Your API key
+client = OpenAI(api_key="ENTER YOUR PERSONAL API KEY")
+MODEL_NAME = "gpt-3.5-turbo"
+
+# Function to generate ideas
+def generate_youtube_ideas():
+    topic = topic_entry.get().strip()
+    if not topic:
+        messagebox.showwarning("Input Error", "Please enter a topic!")
+        return
+    
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[
+                {"role": "system", "content": "You are a YouTube coach who gives trending and unique content ideas. If the topic is travelling, suggest places to visit this season. If tech, suggest gadgets. Be very practical."},
+                {"role": "user", "content": topic}
+            ],
+            max_completion_tokens=400
+        )
+        ideas = response.choices[0].message.content.strip()
+        output_text.delete("1.0", tk.END)
+        output_text.insert(tk.END, ideas)
+    except Exception as e:
+        output_text.delete("1.0", tk.END)
+        output_text.insert(tk.END, f"⚠️ Error generating ideas: {e}")
+
+# ------------------ GUI ------------------
+root = tk.Tk()
+root.title("YouTube Mastery: Content Idea Generator")
+root.geometry("700x500")
+root.config(bg="#181818")
+
+# Title Label
+title_label = tk.Label(root, text="🎬 YouTube Mastery: Idea Generator", 
+                       font=("Arial", 18, "bold"), fg="white", bg="#181818")
+title_label.pack(pady=10)
+
+# Input frame
+input_frame = tk.Frame(root, bg="#181818")
+input_frame.pack(pady=10)
+
+topic_label = tk.Label(input_frame, text="Enter Topic:", font=("Arial", 12), fg="white", bg="#181818")
+topic_label.grid(row=0, column=0, padx=5)
+
+topic_entry = tk.Entry(input_frame, font=("Arial", 12), width=40, bg="#303030", fg="white", insertbackground="white")
+topic_entry.grid(row=0, column=1, padx=5)
+
+generate_button = tk.Button(input_frame, text="🚀 Generate Ideas", font=("Arial", 12, "bold"), 
+                            bg="#FF0000", fg="white", relief="flat", command=generate_youtube_ideas)
+generate_button.grid(row=0, column=2, padx=5)
+
+# Output Text
+output_text = tk.Text(root, font=("Arial", 12), wrap="word", bg="#202020", fg="white", insertbackground="white")
+output_text.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+
+# Footer
+footer_label = tk.Label(root, text="✨ 'The best way to get started is to quit talking and begin doing.' – Walt Disney", 
+                        font=("Arial", 10), fg="gray", bg="#181818")
+footer_label.pack(side="bottom", pady=10)
+
+root.mainloop()
